@@ -1,1 +1,1 @@
-# Cycle Node.js Websocket Server
+# Websocket Client/Server Cycle.js driver
