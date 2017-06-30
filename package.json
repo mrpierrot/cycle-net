@@ -8,6 +8,10 @@
     "build": "babel src -d dist",
     "watch": "babel src -d dist -w"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mrpierrot/cycle-ws.git"
+  },
   "keywords": [
     "node",
     "cycle.js",
