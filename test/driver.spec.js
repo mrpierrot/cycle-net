@@ -18,40 +18,42 @@ describe('driver', function () {
 
         function main(sources) {
 
-            const { socketServer,socketClient, fake } = sources;
+            const { socketServer, socketClient, fake } = sources;
 
-            const wss = socketServer.select('ws');
+            const wss = socketServer.select('server');
             const client = socketClient.select('client');
             const serverConnection$ = wss.events('connection');
-            const socket$ = client.events('ready').map( ({socket}) => socket);
+            const clientReady$ = client.events('ready');
 
             const serverMessage$ = serverConnection$.map(({ socket }) =>
                 xs.merge(
-                    socket.events('message').map( ({data}) => socket.send(data)),
+                    socket.events('message').map(({ data }) => socket.send(data)),
                     xs.of(socket.send('ready'))
                 )
             ).compose(flattenConcurrently);
 
-            const clientMessage$ = socket$.map( socket => 
+            const clientMessage$ = clientReady$.map(({ socket }) =>
                 xs.merge(
-                    socket.events('message').map( ({data}) => socket.send(data) ),
+                    //socket.events('message').map(({ data }) => socket.send(data)),
                     xs.of(socket.send('covfefe'))
                 )
             ).compose(flattenConcurrently);
 
+            const output$ = clientReady$.map(({ socket })  => socket.events('message')).flatten();
+
             const clientCreate$ = wss.events('ready').mapTo({
-                id:'client',
+                id: 'client',
                 action: 'create',
-                url:'ws://localhost:2001'
+                url: 'ws://localhost:2001'
             })
 
-           /* const clientClose$ = xs.of({
-                id:'client',
-                action: 'close'
-            })*/
+            /* const clientClose$ = xs.of({
+                 id:'client',
+                 action: 'close'
+             })*/
 
             const serverCreate$ = xs.of({
-                id: 'ws',
+                id: 'server',
                 action: 'create',
                 config: {
                     port: 2001
@@ -64,9 +66,9 @@ describe('driver', function () {
             });
 
             const sinks = {
-                //fake: response$,
+                fake: output$,
                 socketServer: xs.merge(serverCreate$, serverClose$, serverMessage$),
-                socketClient: xs.merge(clientCreate$,clientMessage$)
+                socketClient: xs.merge(clientCreate$, clientMessage$)
             }
 
             return sinks;
@@ -76,8 +78,8 @@ describe('driver', function () {
             socketServer: makeWSServerDriver(Websocket.Server),
             socketClient: makeWSClientDriver(Websocket),
             fake: makeFakeReadDriver((outgoing, i, complete) => {
-                if (outgoing.text) {
-                    assert.equal(outgoing.text, 'pouet')
+                if (outgoing.data) {
+                    assert.equal(outgoing.data, 'ready')
                 }
             }, done, 1)
         }

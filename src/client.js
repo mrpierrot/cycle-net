@@ -28,12 +28,13 @@ function createClientProducer(WebSocket, instanceId, url, protocols, config) {
                 })
             });
 
-            listener.next({
-                event: 'ready',
-                socket: SocketWrapper(client),
-                instanceId
-            })
-
+            client.addEventListener('open', (e) => {
+                listener.next({
+                    event: 'ready',
+                    socket: SocketWrapper(client),
+                    instanceId
+                })
+            });
 
             /*
 

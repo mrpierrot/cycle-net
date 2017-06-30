@@ -6,8 +6,8 @@ function createSocketEventProducer(socket, eventName) {
     let eventListener = null;
     return {
         start(listener) {
-            eventListener = (data) => {
-                listener.next({ event: eventName, data });
+            eventListener = (e) => {
+                listener.next({ event: eventName, data:e.data });
             }
             socket.addEventListener(eventName, eventListener);
         },
@@ -26,6 +26,7 @@ export function SocketWrapper(socket) {
         },
         send(message){
             return {
+                action:'send',
                 message,
                 socket
             }
