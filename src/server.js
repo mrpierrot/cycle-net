@@ -1,14 +1,18 @@
 import xs from 'xstream';
-import { adapt } from '@cycle/run/lib/adapt';
-import flattenConcurrently from 'xstream/extra/flattenConcurrently';
-import socketWrapper from './socket';
+import { SocketWrapper } from './socket';
+import { makeDriver } from './commons';
 
 function createServerProducer(wsServer,instanceId,config) {
     let server;
 
     return {
         start(listener) {
-            server = wsServer(config);
+            server = new wsServer(config,()=>{
+                listener.next({
+                    event: 'ready',
+                    instanceId
+                })
+            });
 
             server.on('error',(e)=>{
                 listener.error({
@@ -21,10 +25,12 @@ function createServerProducer(wsServer,instanceId,config) {
             server.on('connection',(socket)=>{
                 listener.next({
                     event: 'connection',
-                    socket:socketWrapper(socket),
+                    socket:SocketWrapper(socket),
                     instanceId
                 })
             })
+
+            
 
         },
 
@@ -36,7 +42,6 @@ function createServerProducer(wsServer,instanceId,config) {
 
 function makeCreateAction(wsServer,stopAction$) {
     return function createAction({ id, config }) {
-       
         return xs.create(createServerProducer(wsServer,id, config))
             .endWhen(stopAction$.filter(o => o.id === id))
     }
@@ -48,28 +53,6 @@ function sendAction({ socket, message  }) {
 
 export function makeWSServerDriver(wsServer) {
 
-    return function WSServerDriver(input$) {
-        const closeAction$ = input$.filter(o => o.action === 'close');
-        const createAction$ = input$.filter(o => o.action === 'create')
-            .map(makeCreateAction(wsServer,closeAction$))
-            .compose(flattenConcurrently);
-        const sendAction$ = input$.filter(o => o.action === 'send').map(sendAction);
+    return makeDriver(wsServer,makeCreateAction,sendAction);
 
-        sendAction$.addListener({
-            next() { },
-            complete() { },
-            error() { }
-        });
-
-        return {
-            select(instanceId) {
-                return {
-                    events(name) {
-                        return adapt(createAction$.filter(o => o.instanceId === instanceId && o.event === name));
-                    }
-                }
-            }
-        }
-
-    }
 }

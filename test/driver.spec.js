@@ -21,25 +21,28 @@ describe('driver', function () {
             const { socketServer,socketClient, fake } = sources;
 
             const wss = socketServer.select('ws');
-            const client = socketClient$.select('client');
+            const client = socketClient.select('client');
             const serverConnection$ = wss.events('connection');
+            const socket$ = client.events('ready').map( ({socket}) => socket);
 
             const serverMessage$ = serverConnection$.map(({ socket }) =>
                 xs.merge(
-                    socket.events('ping').map(socket => socket.send('pang')),
+                    socket.events('message').map( ({data}) => socket.send(data)),
                     xs.of(socket.send('ready'))
                 )
             ).compose(flattenConcurrently);
 
+            const clientMessage$ = socket$.map( socket => 
+                xs.merge(
+                    socket.events('message').map( ({data}) => socket.send(data) ),
+                    xs.of(socket.send('covfefe'))
+                )
+            ).compose(flattenConcurrently);
 
-            const clientMessage$ = xs.merge(
-                client.events('message').map( socket.send('plop')),
-                xs.of()
-
-            const clientCreate$ = xs.of({
+            const clientCreate$ = wss.events('ready').mapTo({
                 id:'client',
                 action: 'create',
-                url:'ws://localhost:1983'
+                url:'ws://localhost:2001'
             })
 
            /* const clientClose$ = xs.of({
@@ -51,7 +54,7 @@ describe('driver', function () {
                 id: 'ws',
                 action: 'create',
                 config: {
-                    port: 1983
+                    port: 2001
                 }
             });
 
@@ -61,10 +64,9 @@ describe('driver', function () {
             });
 
             const sinks = {
-                fake: response$,
+                //fake: response$,
                 socketServer: xs.merge(serverCreate$, serverClose$, serverMessage$),
-                socketClient: xs.merge(clientCreate$,message$),
-                HTTP: request$
+                socketClient: xs.merge(clientCreate$,clientMessage$)
             }
 
             return sinks;

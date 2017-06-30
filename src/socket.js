@@ -1,11 +1,13 @@
 import xs from 'xstream';
+import { adapt } from '@cycle/run/lib/adapt';
+import { makeDriver } from './commons';
 
 function createSocketEventProducer(socket, eventName) {
     let eventListener = null;
     return {
         start(listener) {
             eventListener = (data) => {
-                listener.next({ name: eventName, data });
+                listener.next({ event: eventName, data });
             }
             socket.addEventListener(eventName, eventListener);
         },

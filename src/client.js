@@ -1,25 +1,24 @@
 import xs from 'xstream';
-import { adapt } from '@cycle/run/lib/adapt';
-import flattenConcurrently from 'xstream/extra/flattenConcurrently';
-import socketWrapper from './socket';
+import { SocketWrapper } from './socket';
+import { makeDriver } from './commons';
 
 function bindEvent(instanceId, client, listener, name) {
     client.addEventListener(name, (data) => {
         listener.next({
             event: name,
-            data:data,
-            socket: socketWrapper(client),
+            data: data,
+            socket: SocketWrapper(client),
             instanceId
         })
     });
 }
 
-function createClientProducer(WebSocket, instanceId, url, config) {
+function createClientProducer(WebSocket, instanceId, url, protocols, config) {
     let client;
 
     return {
         start(listener) {
-            client = new WebSocket(url, config);
+            client = new WebSocket(url, protocols, config);
 
             client.addEventListener('error', (e) => {
                 listener.error({
@@ -29,10 +28,9 @@ function createClientProducer(WebSocket, instanceId, url, config) {
                 })
             });
 
-
             listener.next({
                 event: 'ready',
-                socket: socketWrapper(client),
+                socket: SocketWrapper(client),
                 instanceId
             })
 
@@ -56,9 +54,8 @@ function createClientProducer(WebSocket, instanceId, url, config) {
 }
 
 function makeCreateAction(WebSocket, stopAction$) {
-    return function createAction({ id, url, config }) {
-
-        return xs.create(createClientProducer(WebSocket, id, url, config))
+    return function createAction({ id, url, protocols, config }) {
+        return xs.create(createClientProducer(WebSocket, id, url, protocols, config))
             .endWhen(stopAction$.filter(o => o.id === id))
     }
 }
@@ -68,29 +65,5 @@ function sendAction({ socket, message }) {
 }
 
 export function makeWSClientDriver(WebSocket = global.WebSocket) {
-
-    return function makeWSClientDriver(input$) {
-        const closeAction$ = input$.filter(o => o.action === 'close');
-        const createAction$ = input$.filter(o => o.action === 'create')
-            .map(makeCreateAction(WebSocket, closeAction$))
-            .compose(flattenConcurrently);
-        const sendAction$ = input$.filter(o => o.action === 'send').map(sendAction);
-
-        sendAction$.addListener({
-            next() { },
-            complete() { },
-            error() { }
-        });
-
-        return {
-            select(instanceId) {
-                return {
-                    events(name) {
-                        return adapt(createAction$.filter(o => o.instanceId === instanceId && o.event === name));
-                    }
-                }
-            }
-        }
-
-    }
+    return makeDriver(WebSocket, makeCreateAction, sendAction);
 }
