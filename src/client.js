@@ -2,12 +2,12 @@ import xs from 'xstream';
 import { SocketWrapper } from './socket';
 import { makeDriver } from './commons';
 
-function bindEvent(instanceId, client, listener, name) {
+function bindEvent(instanceId, client, wrapper, listener, name) {
     client.addEventListener(name, (data) => {
         listener.next({
             event: name,
             data: data,
-            socket: SocketWrapper(client),
+            socket: wrapper,
             instanceId
         })
     });
@@ -19,6 +19,7 @@ function createClientProducer(WebSocket, instanceId, url, protocols, config) {
     return {
         start(listener) {
             client = new WebSocket(url, protocols, config);
+            const wrapper = SocketWrapper(client);
 
             client.addEventListener('error', (e) => {
                 listener.error({
@@ -31,20 +32,18 @@ function createClientProducer(WebSocket, instanceId, url, protocols, config) {
             client.addEventListener('open', (e) => {
                 listener.next({
                     event: 'ready',
-                    socket: SocketWrapper(client),
+                    socket: wrapper,
                     instanceId
                 })
             });
 
-            /*
-
-            bindEvent(instanceId, client, listener, 'open');
-            bindEvent(instanceId, client, listener, 'close');
-            bindEvent(instanceId, client, listener, 'headers');
-            bindEvent(instanceId, client, listener, 'message');
-            bindEvent(instanceId, client, listener, 'ping');
-            bindEvent(instanceId, client, listener, 'pong');
-            bindEvent(instanceId, client, listener, 'unexpected-response');*/
+            bindEvent(instanceId, client, wrapper, listener, 'open');
+            bindEvent(instanceId, client, wrapper, listener, 'close');
+            bindEvent(instanceId, client, wrapper, listener, 'headers');
+            bindEvent(instanceId, client, wrapper, listener, 'message');
+            bindEvent(instanceId, client, wrapper, listener, 'ping');
+            bindEvent(instanceId, client, wrapper, listener, 'pong');
+            bindEvent(instanceId, client, wrapper, listener, 'unexpected-response');
 
         },
 

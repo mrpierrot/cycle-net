@@ -1,12 +1,13 @@
 {
   "name": "cycle-ws",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Websocket drivers for Cycle.js",
   "main": "dist/index.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --require babel-register",
     "build": "babel src -d dist",
-    "watch": "babel src -d dist -w"
+    "watch": "babel src -d dist -w",
+    "pkg": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
