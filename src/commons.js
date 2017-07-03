@@ -28,3 +28,7 @@ export function makeDriver(core,makeCreateAction,sendAction) {
 
     }
 }
+
+export function sendAction({ socket, message  }) {
+    socket.send(message)
+}

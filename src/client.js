@@ -1,9 +1,17 @@
 import xs from 'xstream';
 import { SocketWrapper } from './socket';
-import { makeDriver } from './commons';
+import { makeDriver, sendAction } from './commons';
 
 function bindEvent(instanceId, client, wrapper, listener, name) {
-    client.addEventListener(name, (data) => {
+    client.addEventListener(name, (e) => {
+        let data = e.data;
+        if(typeof(data) === 'string'){
+            try{
+                data = JSON.parse(data);
+            }catch(e){
+                // do nothing
+            }
+        }
         listener.next({
             event: name,
             data: data,
@@ -48,7 +56,7 @@ function createClientProducer(WebSocket, instanceId, url, protocols, config) {
         },
 
         stop() {
-            client.terminate();
+            client.close();
         }
     }
 }
@@ -58,10 +66,6 @@ function makeCreateAction(WebSocket, stopAction$) {
         return xs.create(createClientProducer(WebSocket, id, url, protocols, config))
             .endWhen(stopAction$.filter(o => o.id === id))
     }
-}
-
-function sendAction({ socket, message }) {
-    socket.send(message)
 }
 
 export function makeWSClientDriver(WebSocket = global.WebSocket) {

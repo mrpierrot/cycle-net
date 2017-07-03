@@ -7,7 +7,15 @@ function createSocketEventProducer(socket, eventName) {
     return {
         start(listener) {
             eventListener = (e) => {
-                listener.next({ event: eventName, data:e.data });
+                let data = e.data;
+                if(typeof(data) === 'string'){
+                    try{
+                        data = JSON.parse(data);
+                    }catch(e){
+                        // do nothing
+                    }
+                }
+                listener.next({ event: eventName, data });
             }
             socket.addEventListener(eventName, eventListener);
         },
@@ -28,6 +36,13 @@ export function SocketWrapper(socket) {
             return {
                 action:'send',
                 message,
+                socket
+            }
+        },
+        json(message){
+            return {
+                action:'send',
+                message:JSON.stringify(message),
                 socket
             }
         }
