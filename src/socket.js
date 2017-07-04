@@ -6,18 +6,16 @@ function createSocketEventProducer(socket, eventName) {
     let eventListener = null;
     return {
         start(listener) {
-            eventListener = (e) => {
-                let data = e.data;
-                if(typeof(data) === 'string'){
-                    try{
-                        data = JSON.parse(data);
-                    }catch(e){
-                        // do nothing
-                    }
+            if(socket.on){
+                eventListener = (data) => listener.next({ event: eventName, data });
+                socket.on(eventName, eventListener)
+            }else{
+                 eventListener = (e) => {
+                    listener.next({ event: eventName, data:e.data });
                 }
-                listener.next({ event: eventName, data });
+                socket.addEventListener(eventName, eventListener)
             }
-            socket.addEventListener(eventName, eventListener);
+           
         },
         stop() {
             socket.removeListener(eventName, eventListener)
@@ -36,13 +34,6 @@ export function SocketWrapper(socket) {
             return {
                 action:'send',
                 message,
-                socket
-            }
-        },
-        json(message){
-            return {
-                action:'send',
-                message:JSON.stringify(message),
                 socket
             }
         }
