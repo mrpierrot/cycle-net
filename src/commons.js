@@ -40,3 +40,23 @@ export function makeNetDriver(driver) {
 export function sendAction({ socket, message  }) {
     socket.send(message)
 }
+
+export function applyMiddlewares(middlewares, req, res) {
+
+    return new Promise((resolve, reject) => {
+
+        const size = middlewares ? middlewares.length : 0;
+        let i = -1;
+
+        function next() {
+            i++;
+            if (i < size) {
+                middlewares[i](req, res, next);
+            } else {
+                resolve();
+            }
+        }
+
+        next();
+    })
+}

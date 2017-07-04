@@ -23,6 +23,7 @@
   ],
   "dependencies": {
     "@cycle/run": "^3.1.0",
+    "switch-path": "^1.2.0",
     "xstream": "^10.7.0"
   },
   "devDependencies": {
