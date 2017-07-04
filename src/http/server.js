@@ -1,5 +1,4 @@
-import http from 'http';
-import https from 'https';
+
 import xs from 'xstream';
 import { applyMiddlewares } from '../commons';
 import { createRequestWrapper } from './request';
@@ -7,6 +6,10 @@ import { adapt } from '@cycle/run/lib/adapt';
 import flattenConcurrently from 'xstream/extra/flattenConcurrently';
 
 function makeProducer(rootMiddlewares,render) {
+    
+    import http from 'http';
+    import https from 'https';
+
     function createServerProducer(cfg) {
         let server;
 
