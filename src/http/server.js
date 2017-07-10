@@ -13,15 +13,15 @@ function makeProducer(rootMiddlewares=[], render = v => v) {
     return function createServerProducer(cfg) {
         let server;
 
-        const { id, secured = false, options = {}, securedOptions = {}, middlewares = [] } = cfg;
+        const { id, secured = false, config = {}, securedConfig = {}, middlewares = [] } = cfg;
 
         const createServerFunc = secured ?
-            (callback) => https.createServer(securedOptions, callback) :
+            (callback) => https.createServer(securedConfig, callback) :
             (callback) => http.createServer(callback);
 
-        const listenArgs = typeof (options.handle) === 'object' ? options.handle :
-            typeof (options.path) === 'string' ? options.path :
-                [options.port, options.hostname, options.backlog]
+        const listenArgs = typeof (config.handle) === 'object' ? config.handle :
+            typeof (config.path) === 'string' ? config.path :
+                [config.port, config.hostname, config.backlog]
 
         return {
             start(listener) {
@@ -52,19 +52,6 @@ function makeProducer(rootMiddlewares=[], render = v => v) {
         }
     }
 }
-
-
-
-function makeCreateAction(rootMiddlewares, render, stopAction$) {
-    return function createAction({ id, secured, securedOptions, port, hostname, backlog, handle, path, middlewares = [] }) {
-        const createServerFunc = secured ?
-            (callback) => https.createServer(securedOptions, callback) :
-            (callback) => http.createServer(callback);
-        return xs.create(createServerProducer(id, { port, hostname, backlog, handle, path }, [...rootMiddlewares, ...middlewares], render, createServerFunc))
-            .endWhen(stopAction$.filter(o => o.id === id))
-    }
-}
-
 
 function sendAction({ res, content, headers = null, statusCode = 200, statusMessage = null }) {
     res.writeHead(statusCode, statusMessage || '', headers);

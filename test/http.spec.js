@@ -12,7 +12,7 @@ const fs = require('fs');
 const bodyParser = require('body-parser');
 const { html } = require('snabbdom-jsx');
 
-const securedOptions = {
+const securedConfig = {
     key: fs.readFileSync(`${__dirname}/certs/key.pem`),
     cert: fs.readFileSync(`${__dirname}/certs/cert.pem`)
 };
@@ -43,7 +43,7 @@ describe('http', function () {
             const httpCreate$ = xs.of({
                 id: 'http',
                 action: 'create',
-                options:{
+                config:{
                     port: 1983
                 }
             });
@@ -98,11 +98,11 @@ describe('http', function () {
             const httpsCreate$ = xs.of({
                 id: 'https',
                 action: 'create',
-                options:{
+                config:{
                     port: 1984
                 },
                 secured: true,
-                securedOptions
+                securedConfig
             });
 
             const httpsClose$ = fake.mapTo({
@@ -163,17 +163,17 @@ describe('http', function () {
                 {
                     id: 'http',
                     action: 'create',
-                    options:{
+                    config:{
                         port: 1983
                     }
                 }, {
                     id: 'https',
                     action: 'create',
-                    options:{
+                    config:{
                         port: 1984
                     },
                     secured: true,
-                    securedOptions
+                    securedConfig
                 }
             ]);
 
@@ -240,7 +240,7 @@ describe('http', function () {
             const httpCreate$ = xs.of({
                 id: 'http',
                 action: 'create',
-                options:{
+                config:{
                     port: 1985
                 }
             });
@@ -298,7 +298,7 @@ describe('http', function () {
             const httpCreate$ = xs.of({
                 id: 'http',
                 action: 'create',
-                options:{
+                config:{
                     port: 1986
                 }
             });
@@ -344,14 +344,14 @@ describe('http', function () {
             const httpCreate$ = xs.from([{
                 id: 'http-1',
                 action: 'create',
-                options:{
+                config:{
                     port: 2048
                 }
             },
             {
                 id: 'http-2',
                 action: 'create',
-                options:{
+                config:{
                     port: 2048
                 }
             }]);
