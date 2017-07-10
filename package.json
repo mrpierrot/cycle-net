@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mrpierrot/cycle-ws.git"
+    "url": "git+https://github.com/mrpierrot/cycle-net.git"
   },
   "keywords": [
     "node",
