@@ -1,10 +1,10 @@
 
 
-export function createResponseWrapper(instanceId,res, render = (data) => data) {
+export function createResponseWrapper(id,res, render = (data) => data) {
 
     function _send(content, { statusCode = 200, headers = null, statusMessage = null } = {}) {
         return {
-            instanceId,
+            id,
             action:'send',
             res,
             content,

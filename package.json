@@ -1,12 +1,13 @@
 {
   "name": "cycle-net",
-  "version": "2.0.0",
+  "version": "2.0.5",
   "description": "Net (Websocket/Socket.io/HTTP(S)) drivers for Cycle.js",
   "main": "dist/index.js",
   "scripts": {
     "test": "./node_modules/mocha/bin/mocha --require babel-register",
     "test:ws": "./node_modules/mocha/bin/mocha --require babel-register ./test/ws.spec.js",
     "test:io": "./node_modules/mocha/bin/mocha --require babel-register ./test/io.spec.js",
+    "test:http": "./node_modules/mocha/bin/mocha --require babel-register ./test/http.spec.js",
     "build": "babel src -d dist",
     "watch": "babel src -d dist -w",
     "pkg": "npm run build && npm publish"
@@ -22,7 +23,10 @@
     "websocket"
   ],
   "dependencies": {
+    "@cycle/http": "^13.3.0",
     "@cycle/run": "^3.1.0",
+    "body-parser": "^1.17.2",
+    "snabbdom-jsx": "^0.3.1",
     "switch-path": "^1.2.0",
     "xstream": "^10.7.0"
   },
@@ -35,6 +39,7 @@
     "body-parser": "^1.17.2",
     "lodash": "^4.17.4",
     "mocha": "^3.4.2",
+    "snabbdom-to-html": "^3.2.0",
     "socket.io": "^2.0.3",
     "socket.io-client": "^2.0.3",
     "ws": "^3.0.0"

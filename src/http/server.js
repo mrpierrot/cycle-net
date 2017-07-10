@@ -5,15 +5,15 @@ import { createRequestWrapper } from './request';
 import { adapt } from '@cycle/run/lib/adapt';
 import flattenConcurrently from 'xstream/extra/flattenConcurrently';
 
-function makeProducer(rootMiddlewares,render) {
-    
-    import http from 'http';
-    import https from 'https';
+function makeProducer(rootMiddlewares=[], render = v => v) {
 
-    function createServerProducer(cfg) {
+    const http = require('http');
+    const https = require('https');
+
+    return function createServerProducer(cfg) {
         let server;
 
-        const {id, secured, options, securedOptions, middlewares} = cfg;
+        const { id, secured = false, options = {}, securedOptions = {}, middlewares = [] } = cfg;
 
         const createServerFunc = secured ?
             (callback) => https.createServer(securedOptions, callback) :
@@ -35,6 +35,7 @@ function makeProducer(rootMiddlewares,render) {
                         id
                     })
                 })
+
                 server.listen.apply(server, [...listenArgs, () => {
                     listener.next({
                         event: 'ready',
@@ -70,9 +71,9 @@ function sendAction({ res, content, headers = null, statusCode = 200, statusMess
     res.end(content);
 }
 
-export function httpServer(rootMiddlewares,render) {
+export function httpServer({ middlewares, render } = {}) {
     return {
-        producer: makeProducer(rootMiddlewares,render),
+        producer: makeProducer(middlewares, render),
         sendAction: sendAction
     }
 }

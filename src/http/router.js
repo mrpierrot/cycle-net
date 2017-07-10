@@ -2,7 +2,7 @@ import switchPath from 'switch-path';
 import xs from 'xstream';
 import flattenConcurrently from 'xstream/extra/flattenConcurrently';
 
-export function Router(sources, routes = {}) {
+export function httpRouter(sources, routes = {}) {
 
     const { request$ } = sources;
 
