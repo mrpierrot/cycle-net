@@ -1,6 +1,6 @@
 import xs from 'xstream';
-import { SocketWrapper } from '../socket';
-import { sendAction } from '../commons';
+import { SocketWrapper } from './socket';
+import { sendAction } from './commons';
 
 function bindEvent(id, client, wrapper, listener, name) {
     client.addEventListener(name, (e) => {

@@ -37,10 +37,6 @@ export function makeNetDriver(driver) {
     }
 }
 
-export function sendAction({ socket, message  }) {
-    socket.send(message)
-}
-
 export function applyMiddlewares(middlewares, req, res) {
 
     return new Promise((resolve, reject) => {

@@ -1,6 +1,5 @@
 import xs from 'xstream';
 import { adapt } from '@cycle/run/lib/adapt';
-import { makeDriver } from './commons';
 
 function createSocketEventProducer(socket, eventName) {
     let eventListener = null;
@@ -34,7 +33,6 @@ export function SocketWrapper(socket) {
         send(message){
             return {
                 action:'send',
-                eventName:'message',
                 message,
                 socket
             }

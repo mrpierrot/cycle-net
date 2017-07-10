@@ -9,7 +9,6 @@ function createSocketEventProducer(socket, eventName) {
             if(socket.on){
                 eventListener = (data) => listener.next({ event: eventName, data });
                 socket.on(eventName, eventListener)
-                console.log(eventName)
             }else{
                  eventListener = (e) => {
                     listener.next({ event: eventName, data:e.data });
@@ -31,10 +30,10 @@ export function SocketWrapper(socket) {
         events(eventName) {
             return adapt(xs.create(createSocketEventProducer(socket, eventName)))
         },
-        send(message){
+        send(name,message){
             return {
                 action:'send',
-                eventName:'message',
+                eventName:name,
                 message,
                 socket
             }

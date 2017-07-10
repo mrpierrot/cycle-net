@@ -1,6 +1,6 @@
 import xs from 'xstream';
-import { SocketWrapper } from '../socket';
-import { makeDriver, sendAction } from '../commons';
+import { SocketWrapper } from './socket';
+import { emitAction } from './commons';
 
 
 function makeProducer(clazz) {
@@ -44,6 +44,6 @@ function makeProducer(clazz) {
 export function ioServer(clazz) {
     return {
         producer: makeProducer(clazz),
-        sendAction: sendAction
+        sendAction: emitAction
     }
 }

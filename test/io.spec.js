@@ -27,50 +27,41 @@ describe('io', function () {
             const serverReady$ = server.events('ready');
             const clientReady$ = client.events('ready');
 
-            const serverMessage$ = serverConnection$.map(({ socket }) =>
-                xs.merge(
-                    socket.events('message').map(({ data }) => socket.send(data)),
-                    xs.of(socket.send('ready'))
-                )
-            ).compose(flattenConcurrently);
-
-            const clientMessage$ = clientReady$.map(({ socket }) =>
-                xs.merge(
-                    //socket.events('message').map(({ data }) => socket.send(data)),
-                    xs.of(socket.send('covfefe'))
-                )
-            ).compose(flattenConcurrently);
-
-            const output$ = clientReady$.map(({ socket }) => socket.events('message')).flatten();
+            const serverCreate$ = xs.of({
+                id: 'server',
+                action: 'create',
+                config:{
+                    port:2001
+                }
+            });
 
             const clientCreate$ = serverReady$.mapTo({
                 id: 'client',
                 action: 'create',
-                url: 'ws://localhost:2001'
-            })
+                url:'ws://localhost:2001'
+            });
 
             const clientClose$ = fake.mapTo({
                 id: 'client',
                 action: 'close'
             })
 
-            const serverCreate$ = xs.of({
-                id: 'server',
-                action: 'create',
-                config:{
-                    port: 2001
-                }
-            });
-
             const serverClose$ = fake.mapTo({
                 action: 'close',
                 id: 'server',
             });
 
+
+
+            const serverMessage$ = serverConnection$.map(({ socket }) => xs.of(socket.send('eventA','ok')))
+                .compose(flattenConcurrently);
+
+            const output$ = clientReady$.map(({ socket }) => socket.events('eventA')).flatten();
+
             const sinks = {
                 fake: output$,
                 socketServer: xs.merge(serverCreate$, serverClose$, serverMessage$),
-                socketClient: xs.merge(clientCreate$, clientClose$, clientMessage$)
+                socketClient: xs.merge(clientCreate$, clientClose$)
             }
 
             return sinks;
@@ -80,7 +71,9 @@ describe('io', function () {
             socketServer: makeNetDriver(ioServer(Server)),
             socketClient: makeNetDriver(ioClient(Client)),
             fake: makeFakeReadDriver((outgoing, i, complete) => {
-                assert.equal(outgoing.data, 'ready')
+                
+                assert.equal(outgoing.event, 'eventA');
+                assert.equal(outgoing.data, 'ok');
 
             }, done, 1)
         }
@@ -102,22 +95,6 @@ describe('io', function () {
             const serverReady$ = server.events('ready');
             const clientReady$ = client.events('ready');
 
-            const serverMessage$ = serverConnection$.map(({ socket }) =>
-                xs.merge(
-                    socket.events('message').map(({ data }) => socket.send(data)),
-                    xs.of(socket.send('ready'))
-                )
-            ).compose(flattenConcurrently);
-
-            const clientMessage$ = clientReady$.map(({ socket }) =>
-                xs.merge(
-                    //socket.events('message').map(({ data }) => socket.send(data)),
-                    xs.of(socket.send('covfefe'))
-                )
-            ).compose(flattenConcurrently);
-
-            const output$ = clientReady$.map(({ socket }) => socket.events('message')).flatten();
-
             const httpServerCreate$ = xs.of({
                 id: 'http',
                 action: 'create',
@@ -125,6 +102,14 @@ describe('io', function () {
                     port: 2001
                 }
             });
+
+            const serverCreate$ = httpServerReady$.map( ({server}) => ({
+                id: 'server',
+                action: 'create',
+                config:{
+                    server
+                }
+            }));
 
             const clientCreate$ = serverReady$.mapTo({
                 id: 'client',
@@ -137,14 +122,6 @@ describe('io', function () {
                 action: 'close'
             })
 
-            const serverCreate$ = httpServerReady$.map( ({server}) => ({
-                id: 'server',
-                action: 'create',
-                config:{
-                    server
-                }
-            }));
-
             const serverClose$ = fake.mapTo({
                 action: 'close',
                 id: 'server',
@@ -155,11 +132,16 @@ describe('io', function () {
                 id: 'http',
             });
 
+            const serverMessage$ = serverConnection$.map(({ socket }) => xs.of(socket.send('eventA','ok')))
+                .compose(flattenConcurrently);
+
+            const output$ = clientReady$.map(({ socket }) => socket.events('eventA')).flatten();
+
             const sinks = {
                 fake: output$,
                 httpServer: xs.merge(httpServerCreate$,httpServerClose$),
                 socketServer: xs.merge(serverCreate$, serverClose$, serverMessage$),
-                socketClient: xs.merge(clientCreate$, clientClose$, clientMessage$)
+                socketClient: xs.merge(clientCreate$, clientClose$)
             }
 
             return sinks;
@@ -170,7 +152,9 @@ describe('io', function () {
             socketServer: makeNetDriver(ioServer(Server)),
             socketClient: makeNetDriver(ioClient(Client)),
             fake: makeFakeReadDriver((outgoing, i, complete) => {
-                assert.equal(outgoing.data, 'ready')
+                
+                assert.equal(outgoing.event, 'eventA');
+                assert.equal(outgoing.data, 'ok');
 
             }, done, 1)
         }
