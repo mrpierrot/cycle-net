@@ -3,32 +3,31 @@ import { SocketWrapper } from '../socket';
 import { makeDriver, sendAction } from '../commons';
 
 
-function makeProducer(clazz){
-    return function(cfg) {
+function makeProducer(clazz) {
+    return function (cfg) {
         let srv;
-        const {id, server, port, config} = cfg;
+        const { id, config } = cfg;
         return {
             start(listener) {
-
-                srv = port?new clazz(port,config):server?new clazz(server,config):new clazz(config)
+                srv = config.port ? new clazz(config.port, config) : config.server ? new clazz(config.server, config) : new clazz(config)
 
                 listener.next({
                     event: 'ready',
                     id
                 })
 
-                srv.on('error',(e)=>{
+                srv.on('error', (e) => {
                     listener.error({
                         event: 'error',
-                        error:e,
+                        error: e,
                         id
                     })
                 })
 
-                srv.on('connection',(socket)=>{
+                srv.on('connection', (socket) => {
                     listener.next({
                         event: 'connection',
-                        socket:SocketWrapper(socket),
+                        socket: SocketWrapper(socket),
                         id
                     })
                 })
@@ -42,9 +41,9 @@ function makeProducer(clazz){
 
 }
 
-export function ioServer(clazz){
+export function ioServer(clazz) {
     return {
         producer: makeProducer(clazz),
-        sendAction:sendAction
+        sendAction: sendAction
     }
 }
