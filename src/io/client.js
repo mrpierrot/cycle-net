@@ -1,20 +1,12 @@
 import xs from 'xstream';
 import { SocketWrapper } from './socket';
-import { sendAction } from './commons';
+import { emitAction } from './commons';
 
 function bindEvent(id, client, wrapper, listener, name) {
     client.addEventListener(name, (e) => {
-        let data = e.data;
-        if(typeof(data) === 'string'){
-            try{
-                data = JSON.parse(data);
-            }catch(e){
-                // do nothing
-            }
-        }
         listener.next({
             event: name,
-            data: data,
+            data: e?e.data:null,
             socket: wrapper,
             id
         })
@@ -39,21 +31,27 @@ function makeProducer(func){
                     })
                 });
 
-                client.on('connect', (e) => {
-                    listener.next({
-                        event: 'ready',
-                        socket: wrapper,
-                        id
-                    })
-                });
+                listener.next({
+                    event: 'ready',
+                    socket: wrapper,
+                    id
+                })
 
-           /*     bindEvent(id, client, wrapper, listener, 'open');
-                bindEvent(id, client, wrapper, listener, 'close');
-                bindEvent(id, client, wrapper, listener, 'headers');
-                bindEvent(id, client, wrapper, listener, 'message');
+                /*client.on('connect', (e) => {
+                    
+                });*/
+
+                bindEvent(id, client, wrapper, listener, 'connect');
+                bindEvent(id, client, wrapper, listener, 'connect_error');
+                bindEvent(id, client, wrapper, listener, 'connect_timeout');
+                bindEvent(id, client, wrapper, listener, 'disconnect');
+                bindEvent(id, client, wrapper, listener, 'reconnect_attempt');
+                bindEvent(id, client, wrapper, listener, 'reconnecting');
+                bindEvent(id, client, wrapper, listener, 'reconnect_error');
+                bindEvent(id, client, wrapper, listener, 'reconnect_failed');
                 bindEvent(id, client, wrapper, listener, 'ping');
                 bindEvent(id, client, wrapper, listener, 'pong');
-                bindEvent(id, client, wrapper, listener, 'unexpected-response');*/
+                bindEvent(id, client, wrapper, listener, 'message');
 
             },
 
@@ -68,6 +66,6 @@ function makeProducer(func){
 export function ioClient(func){
     return {
         producer: makeProducer(func),
-        sendAction:sendAction
+        sendAction:emitAction
     }
 }

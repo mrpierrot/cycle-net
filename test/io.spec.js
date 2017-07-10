@@ -15,7 +15,7 @@ describe('io', function () {
 
     this.timeout(10000);
 
-    it('default', function (done) {
+   /* it('default', function (done) {
 
         function main(sources) {
 
@@ -79,7 +79,7 @@ describe('io', function () {
         }
         run(main, drivers);
 
-    });
+    });*/
 
     it('over http', function (done) {
 
@@ -152,7 +152,7 @@ describe('io', function () {
             socketServer: makeNetDriver(ioServer(Server)),
             socketClient: makeNetDriver(ioClient(Client)),
             fake: makeFakeReadDriver((outgoing, i, complete) => {
-                
+                console.log("fake : ",outgoing)
                 assert.equal(outgoing.event, 'eventA');
                 assert.equal(outgoing.data, 'ok');
 
