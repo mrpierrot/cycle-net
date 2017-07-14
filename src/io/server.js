@@ -1,6 +1,7 @@
 import xs from 'xstream';
 import { SocketWrapper } from './socket';
 import { emitAction } from './commons';
+import { eventServerFilter } from '../commons';
 
 
 function makeProducer(clazz) {
@@ -44,6 +45,7 @@ function makeProducer(clazz) {
 export function ioServer(clazz) {
     return {
         producer: makeProducer(clazz),
-        sendAction: emitAction
+        sendAction: emitAction,
+        eventFilter:eventServerFilter
     }
 }

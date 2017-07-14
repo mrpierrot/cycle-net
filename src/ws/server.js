@@ -1,6 +1,7 @@
 import xs from 'xstream';
 import { SocketWrapper } from './socket';
 import { sendAction } from './commons';
+import { eventServerFilter } from '../commons';
 
 
 function makeProducer(clazz){
@@ -44,6 +45,7 @@ function makeProducer(clazz){
 export function wsServer(clazz){
     return {
         producer: makeProducer(clazz),
-        sendAction:sendAction
+        sendAction:sendAction,
+        eventFilter:eventServerFilter
     }
 }

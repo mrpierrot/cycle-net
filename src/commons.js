@@ -5,7 +5,7 @@ import flattenConcurrently from 'xstream/extra/flattenConcurrently';
 
 export function makeNetDriver(driver) {
 
-    const {sendAction, producer} = driver;
+    const {sendAction, producer, eventFilter} = driver;
 
     return function driver(input$) {
         const closeAction$ = input$.filter(o => o.action === 'close');
@@ -28,13 +28,27 @@ export function makeNetDriver(driver) {
             select(id) {
                 return {
                     events(name) {
-                        return adapt(createAction$.filter(o => o.id === id && o.event === name));
+                        return adapt(eventFilter(createAction$,id,name));
+                        //return adapt(createAction$.filter(o => o.id === id && o.event === name));
                     }
                 }
             }
         }
 
     }
+}
+
+export function eventClientFilter(stream$,id,name){
+    return xs.merge(
+        eventServerFilter(stream$,id,name),
+        stream$
+            .filter(o => o.id === id && o.event === 'ready')
+            .map((obj) => obj.socket.events(name)).compose(flattenConcurrently)
+        )
+}
+
+export function eventServerFilter(stream$,id,name){
+    return stream$.filter(o => o.id === id && o.event === name);
 }
 
 export function applyMiddlewares(middlewares, req, res) {

@@ -39,7 +39,8 @@ describe('ws', function () {
                 )
             ).compose(flattenConcurrently);
 
-            const output$ = clientReady$.map(({ socket })  => socket.events('message')).flatten();
+            //const output$ = clientReady$.map(({ socket })  => socket.events('message')).flatten();
+            const output$ = client.events('message');
 
             const clientCreate$ = wss.events('ready').mapTo({
                 id: 'client',

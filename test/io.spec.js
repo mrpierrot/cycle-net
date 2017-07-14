@@ -135,7 +135,8 @@ describe('io', function () {
             const serverMessage$ = serverConnection$.map(({ socket }) => xs.of(socket.send('eventA','ok')))
                 .compose(flattenConcurrently);
 
-            const output$ = clientReady$.map(({ socket }) => socket.events('eventA')).flatten();
+           // const output$ = clientReady$.map(({ socket }) => socket.events('eventA')).flatten();
+            const output$ = client.events('eventA');
 
             const sinks = {
                 fake: output$,
