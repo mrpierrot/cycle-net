@@ -1,6 +1,6 @@
 
 import xs from 'xstream';
-import { applyMiddlewares, eventServerFilter } from '../commons';
+import { applyMiddlewares, basicEventFilter } from '../commons';
 import { createRequestWrapper } from './request';
 import { adapt } from '@cycle/run/lib/adapt';
 import flattenConcurrently from 'xstream/extra/flattenConcurrently';
@@ -62,6 +62,6 @@ export function httpServer({ middlewares, render } = {}) {
     return {
         producer: makeProducer(middlewares, render),
         sendAction: sendAction,
-        eventFilter: eventServerFilter
+        eventFilter: basicEventFilter
     }
 }

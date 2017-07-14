@@ -38,16 +38,16 @@ export function makeNetDriver(driver) {
     }
 }
 
-export function eventClientFilter(stream$,id,name){
+export function socketEventFilter(stream$,id,name){
     return xs.merge(
-        eventServerFilter(stream$,id,name),
+        basicEventFilter(stream$,id,name),
         stream$
             .filter(o => o.id === id && o.event === 'ready')
             .map((obj) => obj.socket.events(name)).compose(flattenConcurrently)
         )
 }
 
-export function eventServerFilter(stream$,id,name){
+export function basicEventFilter(stream$,id,name){
     return stream$.filter(o => o.id === id && o.event === name);
 }
 

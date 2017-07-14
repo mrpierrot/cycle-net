@@ -1,7 +1,7 @@
 import xs from 'xstream';
 import { SocketWrapper } from './socket';
 import { sendAction } from './commons';
-import { eventClientFilter } from '../commons';
+import { socketEventFilter } from '../commons';
 
 function bindEvent(id, client, wrapper, listener, name) {
     client.addEventListener(name, (e) => {
@@ -70,6 +70,6 @@ export function wsClient(clazz=global.WebSocket){
     return {
         producer: makeProducer(clazz),
         sendAction:sendAction,
-        eventFilter:eventClientFilter
+        eventFilter:socketEventFilter
     }
 }

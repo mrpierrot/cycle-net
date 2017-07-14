@@ -1,7 +1,7 @@
 import xs from 'xstream';
 import { SocketWrapper } from './socket';
 import { emitAction } from './commons';
-import { eventClientFilter } from '../commons';
+import { socketEventFilter } from '../commons';
 
 function bindEvent(id, client, wrapper, listener, name) {
     client.addEventListener(name, (e) => {
@@ -68,6 +68,6 @@ export function ioClient(func){
     return {
         producer: makeProducer(func),
         sendAction:emitAction,
-        eventFilter:eventClientFilter
+        eventFilter:socketEventFilter
     }
 }
