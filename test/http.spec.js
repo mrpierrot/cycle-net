@@ -1,6 +1,6 @@
 
 require('babel-polyfill');
-
+import delay from 'xstream/extra/delay';
 import { makeNetDriver, httpServer } from '../src/index';
 const { run } = require('@cycle/run');
 
@@ -378,6 +378,73 @@ describe('http', function () {
         run(main, drivers); 
 
     });
+
+     it('http init with separate listen action', function (done) {
+
+        function main(sources) {
+
+            const { httpServer, fake, HTTP } = sources;
+
+            const http = httpServer.select('http');
+            const serverReady$ = http.events('ready').debug(o => console.log('ready'));
+            const serverListening$ = http.events('listening');
+            const serverRequest$ = http.events('request');
+            const serverResponse$ = serverRequest$.map(req => req.response.text('pouet'));
+
+            
+
+            const response$ = HTTP.select('foo').flatten();
+
+            const httpCreate$ = xs.of({
+                id: 'http',
+                action: 'create',
+               
+            });
+
+            const httpListen$ = serverReady$
+                .map(
+                ({id,server}) => ({
+                    id,
+                    server,
+                    action: 'listen',
+                    config:{
+                        port: 1983
+                    }
+                })
+            )
+
+            const request$ = serverListening$.map(() => ({
+                url: 'http://127.0.0.1:1983',
+                category: 'foo'
+            }));
+
+            const httpClose$ = fake.mapTo({
+                action: 'close',
+                id: 'http',
+            });
+
+            const sinks = {
+                fake: xs.combine(serverListening$,response$),
+                httpServer: xs.merge(httpCreate$,httpListen$, httpClose$, serverResponse$),
+                HTTP: request$
+            }
+
+            return sinks;
+        }
+
+        const drivers = {
+            httpServer: makeNetDriver(httpServer()),
+            HTTP: makeHTTPDriver(),
+            fake: makeFakeReadDriver(([serverListening,outgoing], i, complete) => {
+                if (outgoing.text) {
+                    assert.equal(outgoing.text, 'pouet')
+                }
+            }, done, 1)
+        }
+        run(main, drivers);
+
+    });
+
 
 
 });
