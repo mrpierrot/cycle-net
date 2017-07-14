@@ -1,6 +1,6 @@
 {
   "name": "cycle-net",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "Net (Websocket/Socket.io/HTTP(S)) drivers for Cycle.js",
   "main": "dist/index.js",
   "scripts": {
