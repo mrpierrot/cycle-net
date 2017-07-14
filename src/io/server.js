@@ -4,13 +4,13 @@ import { emitAction } from './commons';
 import { basicEventFilter } from '../commons';
 
 
-function makeProducer(clazz) {
+function makeProducer(server) {
     return function (cfg) {
         let srv;
         const { id, config } = cfg;
         return {
             start(listener) {
-                srv = config.port ? new clazz(config.port, config) : config.server ? new clazz(config.server, config) : new clazz(config)
+                srv = config.port ? server(config.port, config) : config.server ? server(config.server, config) : server(config)
 
                 listener.next({
                     event: 'ready',
@@ -42,9 +42,9 @@ function makeProducer(clazz) {
 
 }
 
-export function ioServer(clazz) {
+export function ioServer(server) {
     return {
-        producer: makeProducer(clazz),
+        producer: makeProducer(server),
         sendAction: emitAction,
         eventFilter:basicEventFilter
     }
