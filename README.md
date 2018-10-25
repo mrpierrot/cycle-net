@@ -100,7 +100,7 @@ Like this :
 To close a server instance we need to send a config stream to the httpServer output.
 
 ```js
-    const httpClose$ = fake.mapTo({
+    const httpClose$ = xs.of({
         action: 'close',
         id: 'http',
     });
